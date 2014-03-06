@@ -89,7 +89,7 @@ speedReader =
 
     renderWord : function(word)
     {
-        var threshold = 3,
+        var threshold = 4,
             length = word.length,
             output = [];
 
@@ -98,7 +98,7 @@ speedReader =
 
         if (length <= threshold)
         {
-            output = '_'.repeat(threshold-length);
+            output = ' '.repeat(threshold-length);
         }
         output += word;
 
@@ -126,7 +126,7 @@ speedReader =
 
             if (word.length > 18)
             {
-                var aboutMiddle = (word.length/2).round(1),
+                var aboutMiddle = (word.length/2),
                     partA = word.substring(0, aboutMiddle) + '-',
                     partB = word.substring(aboutMiddle+1)
                 queue.push(partA)

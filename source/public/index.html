@@ -18,9 +18,7 @@
                     </textarea>
                 </div>
                 <div class="row">
-                        <div class="output alert-info alert">
-                            <span id="output">&nbsp;</span>
-                        </div>
+                    <pre id="output" class="lead">&nbsp;</pre>
                     <button
                         id="startBtn"
                         class="btn btn-primary glyphicon glyphicon-play"
@@ -31,7 +29,7 @@
                         <button id="minusWpm" type="button" class="btn btn-default glyphicon glyphicon-minus"></button>
                         <button id="plusWpm" type="button" class="btn btn-default glyphicon glyphicon-plus"></button>
                     </div>
-                    <span id="wpm">---</span> w/m
+                    <span id="wpm">---</span> words/minute
                 </div>
             </div>
         </div>
@@ -43,22 +41,43 @@
             $('#wpm').html(initialSpeed);
             speedReader.readFrom('readme').setSpeed(initialSpeed).bind('output');
 
-            $('#startBtn').click(function(){
+            $('#startBtn').click(togglePlay);
+
+            $('#minusWpm').click(readSlower);
+
+            $('#plusWpm').click(readFaster);
+
+            $('body').keyup(function(e){
+                if(e.keyCode == 32)
+                    togglePlay();
+                else if (e.keyCode == 38)
+                    readFaster();
+                else if (e.keyCode == 40)
+                    readSlower();
+            });
+
+            function togglePlay()
+            {
                 speedReader.togglePlay();
                 $('#startBtn').toggleClass('glyphicon-play glyphicon-pause');
-            });
+            }
 
-            $('#minusWpm').click(function(){
-                var newSpeed = speedReader.wordsPerMinute - 10;
+            function readFaster()
+            {
+                changeSpeed(10);
+            }
+
+            function readSlower()
+            {
+                changeSpeed(-10);
+            }
+
+            function changeSpeed(change)
+            {
+                var newSpeed = speedReader.wordsPerMinute + change;
                 speedReader.setSpeed(newSpeed);
                 $('#wpm').html(newSpeed);
-            });
-
-            $('#plusWpm').click(function(){
-                var newSpeed = speedReader.wordsPerMinute + 10;
-                speedReader.setSpeed(newSpeed);
-                $('#wpm').html(newSpeed);
-            });
+            }
         </script>
     </body>
 </html>
