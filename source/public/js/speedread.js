@@ -74,7 +74,7 @@ speedReader =
     stop : function()
     {
         this.pause();
-        this.wordQueue = [];
+        this.queuePosition = 0;
         return this;
     },
 
