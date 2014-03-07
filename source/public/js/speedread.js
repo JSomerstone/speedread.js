@@ -3,6 +3,11 @@ String.prototype.repeat = function( num )
     return new Array( num + 1 ).join( this );
 }
 
+String.prototype.injectTo = function(index, inject)
+{
+    return this.substr(0, index) + inject + this.substr(index+1);
+}
+
 /**
  * Created by joona on 06/03/14.
  */
@@ -93,25 +98,19 @@ speedReader =
 
     renderWord : function(word)
     {
-        var threshold = 4,
-            length = word.length,
-            output = [];
+        var length = word.length,
+            center = Math.floor(length/2),
+            highlightIndex = center > 1 ? center -1 : center,
+            paddingLength = highlightIndex > 10 ? 10 : 10 - highlightIndex;
 
         if (length == 0)
             return '&nbsp;';
 
-        if (length <= threshold)
-        {
-            output = ' '.repeat(threshold-length);
-        }
-        output += word;
+        var padding = ' '.repeat(paddingLength);
 
-        var outputArray = output.split('');
+        word = word.injectTo(highlightIndex, '<span class="red">' + word.charAt(highlightIndex) + '</span>');
 
-        outputArray.splice(threshold-1, 0, '<span class="red">');
-        outputArray.splice(threshold+1, 0, '</span>');
-
-        return outputArray.join('');
+        return padding + word;
     },
 
     intervalInMilliseconds : function(wpm)
