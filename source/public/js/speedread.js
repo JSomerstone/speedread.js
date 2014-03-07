@@ -9,6 +9,9 @@ String.prototype.repeat = function( num )
 speedReader =
 {
     wordQueue : [],
+    queueLength : 0,
+    queuePosition : 0,
+
     wordsPerMinute : 220,
     intervalId : null,
     reading : false,
@@ -17,6 +20,8 @@ speedReader =
     read : function (text)
     {
         this.wordQueue = this.splitText(text);
+        this.queueLength = this.wordQueue.length;
+        this.queuePosition = 0;
         return this;
     },
 
@@ -27,7 +32,7 @@ speedReader =
 
     bind : function(elementId)
     {
-        this.bindedElement = $('#' + elementId);
+        this.bindedElement = document.getElementById(elementId);
         return this;
     },
 
@@ -75,14 +80,13 @@ speedReader =
 
     nextWord : function ()
     {
-        if (this.wordQueue.length == 0)
+        if (this.queueLength <= this.queuePosition++)
         {
             this.stop();
         }
         else
         {
-            var nextWord = this.wordQueue.shift();
-            this.bindedElement.html(this.renderWord(nextWord));
+            this.bindedElement.innerHTML = this.wordQueue[this.queuePosition];
         }
         return this;
     },
@@ -133,15 +137,15 @@ speedReader =
                 queue.push(partB);
                 continue;
             }
-            queue.push(word);
+            queue.push(this.renderWord(word));
 
             if (word[word.length - 1] == '.')
             {
-                queue.push('')
-                queue.push('');
+                queue.push(' ')
+                queue.push(' ');
             }else if (word[word.length - 1] == ',')
             {
-                queue.push('');
+                queue.push(' ');
             }
         }
 
