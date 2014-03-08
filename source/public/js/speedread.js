@@ -51,7 +51,9 @@ speedReader =
 
     readFrom : function (elementId)
     {
-        return this.read($('#' + elementId)[0].value.trim());
+        var htstring = document.getElementById(elementId).innerHTML,
+            stripped = htstring.replace(/(<([^>]+)>)/ig,"");
+        return this.read(stripped);
     },
 
     bind : function(elementId)
