@@ -151,7 +151,7 @@ speedReader =
             if (word.length == 0)
                 continue;
 
-            if (word.length > 18)
+            if (word.length > 16)
             {
                 var aboutMiddle = (word.length/2),
                     partA = word.substring(0, aboutMiddle) + '-',
