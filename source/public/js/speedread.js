@@ -16,14 +16,26 @@ speedReader =
     wordQueue : [],
     queueLength : 0,
     queuePosition : 0,
+    progress : 0,
 
     wordsPerMinute : 220,
     intervalId : null,
     reading : false,
     bindedElement : null,
 
+    eventMapping : {},
+
+    on : function(event, callBack)
+    {
+        this.eventMapping[event] = {
+            callBack : callBack
+        };
+        return this;
+    },
+
     read : function (text)
     {
+        this.eventTriggered('read');
         this.wordQueue = this.splitText(text);
         this.queueLength = this.wordQueue.length;
         this.queuePosition = 0;
@@ -43,8 +55,9 @@ speedReader =
 
     start : function()
     {
+        this.eventTriggered('start');
         this.intervalId = setInterval(
-            function(){ speedReader.nextWord(); },
+            function(){ speedReader.type(); },
             this.intervalInMilliseconds(this.wordsPerMinute)
         );
         this.reading = true;
@@ -53,6 +66,7 @@ speedReader =
 
     setSpeed : function(wpm)
     {
+        this.eventTriggered('speed-change')
         if (wpm > 1)
         {
             this.wordsPerMinute = wpm;
@@ -73,18 +87,23 @@ speedReader =
     {
         clearInterval(this.intervalId);
         this.reading = false;
+        this.eventTriggered('pause');
         return this;
     },
 
     stop : function()
     {
-        this.pause();
+        clearInterval(this.intervalId);
+        this.reading = false;
         this.queuePosition = 0;
+        this.eventTriggered('stop');
         return this;
     },
 
-    nextWord : function ()
+    type : function ()
     {
+        this.progress = Math.ceil(((this.queuePosition + 1) / this.queueLength) * 100);
+
         if (this.queueLength == this.queuePosition + 1)
         {
             this.stop();
@@ -94,6 +113,7 @@ speedReader =
             this.bindedElement.innerHTML = this.wordQueue[this.queuePosition];
         }
         this.queuePosition++
+        this.eventTriggered('type');
         return this;
     },
 
@@ -136,8 +156,8 @@ speedReader =
                 var aboutMiddle = (word.length/2),
                     partA = word.substring(0, aboutMiddle) + '-',
                     partB = word.substring(aboutMiddle+1)
-                queue.push(partA)
-                queue.push(partB);
+                queue.push(this.renderWord(partA))
+                queue.push(this.renderWord(partB));
                 continue;
             }
             queue.push(this.renderWord(word));
@@ -156,5 +176,12 @@ speedReader =
         }
 
         return queue;
+    },
+
+    eventTriggered : function(name)
+    {
+        if (this.eventMapping[name])
+            this.eventMapping[name].callBack(this);
+
     }
 };
