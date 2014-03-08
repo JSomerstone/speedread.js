@@ -63,7 +63,7 @@
         <script src="js/speedread.js" ></script>
         <script src="bootstrap/js/bootstrap.min.js"></script>
         <script>
-            var initialSpeed = 500;
+            var initialSpeed = 340;
             $('#wpm').html(initialSpeed);
             speedReader.bind('output').readFrom('readme').setSpeed(initialSpeed);
 
@@ -72,6 +72,9 @@
             });
             speedReader.on('stop read', function(){
                 $('#progress').css('width', '0%')
+            });
+            speedReader.on('stop', function(){
+                $('#startBtn').toggleClass('glyphicon-play glyphicon-pause');
             });
 
             $('#startBtn').click(togglePlay);

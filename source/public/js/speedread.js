@@ -31,9 +31,11 @@ speedReader =
 
         for(var i = 0, max = events.length; i < max; i++)
         {
-            this.eventMapping[events[i]] = {
-                callBack : callBack
-            };
+            if ( ! this.eventMapping[events[i]])
+            {
+                this.eventMapping[events[i]] = new Array();
+            }
+            this.eventMapping[events[i]].push(callBack);
         }
         return this;
     },
@@ -148,7 +150,7 @@ speedReader =
     splitText: function(text)
     {
         var queue = [],
-            splitted = text.split(' '),
+            splitted = text.split(/[ \n\t]+/),
             originalLength = splitted.length;
 
         for (var i = 0 ; i < originalLength; i++)
@@ -189,7 +191,11 @@ speedReader =
     eventTriggered : function(name)
     {
         if (this.eventMapping[name])
-            this.eventMapping[name].callBack(this);
-
+        {
+            for(var i = 0, max = this.eventMapping[name].length; i < max; i++)
+            {
+                this.eventMapping[name][i](this);
+            }
+        }
     }
 };
