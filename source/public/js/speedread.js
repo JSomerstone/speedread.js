@@ -85,7 +85,7 @@ speedReader =
 
     nextWord : function ()
     {
-        if (this.queueLength <= this.queuePosition++)
+        if (this.queueLength == this.queuePosition + 1)
         {
             this.stop();
         }
@@ -93,6 +93,7 @@ speedReader =
         {
             this.bindedElement.innerHTML = this.wordQueue[this.queuePosition];
         }
+        this.queuePosition++
         return this;
     },
 
@@ -127,6 +128,9 @@ speedReader =
         {
             var word = splitted.shift();
 
+            if (word.length == 0)
+                continue;
+
             if (word.length > 18)
             {
                 var aboutMiddle = (word.length/2),
@@ -138,12 +142,15 @@ speedReader =
             }
             queue.push(this.renderWord(word));
 
-            if (word[word.length - 1] == '.')
+            //After dot add 2 ticks pause
+            if (word[word.length - 1] == ',')
+            {
+                queue.push(' ');
+            }
+            //After comma add a pause
+            else if (word[word.length - 1] == '.')
             {
                 queue.push(' ')
-                queue.push(' ');
-            }else if (word[word.length - 1] == ',')
-            {
                 queue.push(' ');
             }
         }
