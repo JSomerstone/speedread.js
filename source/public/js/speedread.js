@@ -27,9 +27,14 @@ speedReader =
 
     on : function(event, callBack)
     {
-        this.eventMapping[event] = {
-            callBack : callBack
-        };
+        var events = event.split(' ');
+
+        for(var i = 0, max = events.length; i < max; i++)
+        {
+            this.eventMapping[events[i]] = {
+                callBack : callBack
+            };
+        }
         return this;
     },
 
@@ -53,17 +58,6 @@ speedReader =
         return this;
     },
 
-    start : function()
-    {
-        this.eventTriggered('start');
-        this.intervalId = setInterval(
-            function(){ speedReader.type(); },
-            this.intervalInMilliseconds(this.wordsPerMinute)
-        );
-        this.reading = true;
-        return this;
-    },
-
     setSpeed : function(wpm)
     {
         this.eventTriggered('speed-change')
@@ -75,6 +69,17 @@ speedReader =
         {
             this.pause().start();
         }
+        return this;
+    },
+
+    start : function()
+    {
+        this.eventTriggered('start');
+        this.intervalId = setInterval(
+            function(){ speedReader.type(); },
+            this.intervalInMilliseconds(this.wordsPerMinute)
+        );
+        this.reading = true;
         return this;
     },
 
@@ -136,15 +141,17 @@ speedReader =
 
     intervalInMilliseconds : function(wpm)
     {
-        return (1 / (wpm / 60)) * 1000;
+        return (1 / (wpm / 60)) * 1000 * this.speedFactor;
     },
 
+    speedFactor : 1,
     splitText: function(text)
     {
         var queue = [],
-            splitted = text.split(' ');
+            splitted = text.split(' '),
+            originalLength = splitted.length;
 
-        for (var i = 0, n = splitted.length; i < n; i++)
+        for (var i = 0 ; i < originalLength; i++)
         {
             var word = splitted.shift();
 
@@ -175,6 +182,7 @@ speedReader =
             }
         }
 
+        this.speedFactor = (originalLength / queue.length);
         return queue;
     },
 

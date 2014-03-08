@@ -26,7 +26,7 @@
                         <button id="minusWpm" type="button" class="btn btn-default glyphicon glyphicon-minus"></button>
                         <button id="plusWpm" type="button" class="btn btn-default glyphicon glyphicon-plus"></button>
                     </div>
-                    <span id="wpm">---</span> words/minute
+                    ~<span id="wpm">---</span> words/minute
                 </div>
             </div>
             <div class="col-md-4">
@@ -70,7 +70,7 @@
             speedReader.on('type', function(reader){
                 $('#progress').css('width', reader.progress + '%')
             });
-            speedReader.on('stop', function(){
+            speedReader.on('stop read', function(){
                 $('#progress').css('width', '0%')
             });
 
