@@ -40,20 +40,34 @@ speedReader =
         return this;
     },
 
-    read : function (text)
+    clearQueue : function()
     {
-        this.eventTriggered('read');
-        this.wordQueue = this.splitText(text);
-        this.queueLength = this.wordQueue.length;
-        this.queuePosition = 0;
+        this.eventTriggered('clear');
+        this.wordQueue = [];
+        this.queueLength = 0;
         return this;
     },
 
-    readFrom : function (elementId)
+    readToQueue : function (text)
     {
-        var htstring = document.getElementById(elementId).innerHTML,
+        this.eventTriggered('read');
+        this.wordQueue = this.wordQueue.concat(this.splitText(text));
+        this.queueLength = this.wordQueue.length;
+        return this;
+    },
+
+    readField : function (elementSelector)
+    {
+        var htstring = $(elementSelector).val(),
             stripped = htstring.replace(/(<([^>]+)>)/ig,"");
-        return this.read(stripped);
+        return this.readToQueue(stripped);
+    },
+
+    readElement : function(elementSelector)
+    {
+        var htstring = $(elementSelector).html(),
+            stripped = htstring.replace(/(<([^>]+)>)/ig,"");
+        return this.readToQueue(stripped);
     },
 
     bind : function(elementId)
@@ -111,8 +125,7 @@ speedReader =
 
     type : function ()
     {
-        this.progress = Math.ceil(((this.queuePosition + 1) / this.queueLength) * 100);
-
+        this.updateProgress();
         if (this.queueLength == this.queuePosition + 1)
         {
             this.stop();
@@ -124,6 +137,18 @@ speedReader =
         this.queuePosition++
         this.eventTriggered('type');
         return this;
+    },
+
+    updateProgress : function()
+    {
+        if (this.queueLength === 0)
+        {
+            this.progress = 0;
+        }
+        else
+        {
+            this.progress = Math.ceil(((this.queuePosition + 1) / this.queueLength) * 100);
+        }
     },
 
     renderWord : function(word)
