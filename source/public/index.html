@@ -65,21 +65,24 @@
         <script>
             var initialSpeed = 340;
             $('#wpm').html(initialSpeed);
-            speedReader.bind('#output').readField('#readme').setSpeed(initialSpeed);
+            var speedReader = new SpeedReader()
+                .bind('#output')
+                .readField('#readme')
+                .setSpeed(initialSpeed);
 
-            speedReader.on('type', function(reader){
-                $('#progress').css('width', reader.progress + '%')
+            speedReader.on('stop clear type', function(reader){
+                $('#progress').css('width', reader.getProgress() + '%');
             });
-            speedReader.on('stop read', function(){
-                $('#progress').css('width', '0%')
-            });
-            speedReader.on('stop', function(){
+            speedReader.on('start pause', function(){
                 $('#startBtn').toggleClass('glyphicon-play glyphicon-pause');
             });
+            speedReader.on('speed-change', function(reader){
+                $('#wpm').html(reader.getSpeed());
+            });
 
-            $('#startBtn').click(togglePlay);
-            $('#minusWpm').click(readSlower);
-            $('#plusWpm').click(readFaster);
+            $('#startBtn').click(function(){ speedReader.togglePlay() });
+            $('#minusWpm').click(function(){ speedReader.changeSpeed(-20)} );
+            $('#plusWpm').click(function(){ speedReader.changeSpeed(20)} );
             $('#reloadBtn').click(function () {
                 speedReader.clearQueue().readField('#readme');
             });
@@ -92,35 +95,12 @@
                 }
 
                 if(e.keyCode == 32)
-                    togglePlay();
+                    speedReader.togglePlay();
                 else if (e.keyCode == 38)
-                    readFaster();
+                    speedReader.changeSpeed(20);
                 else if (e.keyCode == 40)
-                    readSlower();
+                    speedReader.changeSpeed(-20);
             });
-
-            function togglePlay()
-            {
-                speedReader.togglePlay();
-                $('#startBtn').toggleClass('glyphicon-play glyphicon-pause');
-            }
-
-            function readFaster()
-            {
-                changeSpeed(10);
-            }
-
-            function readSlower()
-            {
-                changeSpeed(-10);
-            }
-
-            function changeSpeed(change)
-            {
-                var newSpeed = speedReader.wordsPerMinute + change;
-                speedReader.setSpeed(newSpeed);
-                $('#wpm').html(newSpeed);
-            }
         </script>
     </body>
 </html>

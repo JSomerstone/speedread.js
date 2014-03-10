@@ -1,103 +1,132 @@
 
-speedReader =
+function SpeedReader ()
 {
-    wordQueue : [],
-    queueLength : 0,
-    queuePosition : 0,
-    progress : 0,
+    var wordQueue = [],
+        queueLength = 0,
+        queuePosition = 0,
+        progress = 0,
 
-    wordsPerMinute : 220,
-    intervalId : null,
-    reading : false,
-    bindedElement : null,
+        speed,
+        intervalId = null,
+        reading = false,
+        output = null,
 
-    eventMapping : {},
+        eventMapping = {},
+
+        /**
+         *  Factor used to fix reading-speed
+         *  @var float speedFactor
+         */
+        speedFactor = 1;
+
+    var self = this;
 
     /**
      * Add a callback function to given event(s)
-     * The callback function will be called with speedReader as first parameter
+     * The callback function will be called with SpeedReader as first parameter
      *
-     * speedReader.on('stop', function(reader){ alert('the reader has stopped'); });
+     * SpeedReader.on('stop', function(reader){ alert('the reader has stopped'); });
      *
      * @param string event name of event or events separated with space
      * @param function callBack function to call on event
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    on : function(event, callBack)
+    this.on = function(event, callBack)
     {
         var events = event.split(' ');
 
         for(var i = 0, max = events.length; i < max; i++)
         {
-            if ( ! this.eventMapping[events[i]])
+            if ( ! eventMapping[events[i]])
             {
-                this.eventMapping[events[i]] = new Array();
+                eventMapping[events[i]] = new Array();
             }
-            this.eventMapping[events[i]].push(callBack);
+            eventMapping[events[i]].push(callBack);
         }
         return this;
-    },
+    }
+
+    /**
+     * @private
+     * Calls call-back-function(s) of given event if any
+     *
+     * Call-back functions are set with .on() method
+     * Call-back functions will be called with SpeedReader as first parameter
+     *
+     * @param string name
+     */
+    function eventTriggered (eventName)
+    {
+        if (eventMapping.hasOwnProperty(eventName))
+        {
+            for(var i = 0, max = eventMapping[eventName].length; i < max; i++)
+            {
+                eventMapping[eventName][i](self, eventName);
+            }
+        }
+    }
 
     /**
      * Clears the queue
-     * Usefull when re-reading
-     * @returns {speedReader}
+     * Useful when re-reading
+     * @returns {SpeedReader}
      */
-    clearQueue : function()
+    this.clearQueue = function()
     {
-        this.eventTriggered('clear');
-        this.wordQueue = [];
-        this.queueLength = 0;
-        this.queuePosition = 0;
-        this.bindedElement.html('&nbsp;');
+        wordQueue = [];
+        queueLength = 0;
+        queuePosition = 0;
+        progress = 0;
+        output.html('&nbsp;');
+        eventTriggered('clear');
         return this;
-    },
+    }
 
     /**
      * Parses and appends given text to queue
      *
      * @param text
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    readToQueue : function (text)
+    this.readToQueue = function (text)
     {
-        this.eventTriggered('read');
-        this.wordQueue = this.wordQueue.concat(this.splitText(text));
-        this.queueLength = this.wordQueue.length;
+        wordQueue = wordQueue.concat(splitText(text));
+        queueLength = wordQueue.length;
+        eventTriggered('read');
         return this;
-    },
+    }
 
     /**
-     * Reads the _value_ of given field into queue
+     * Reads the _value_ of given field {number}o queue
      * Field is indicated by selector (.elementClass or #elementID)
      *
      * New content will pe appended to the end of the queue - to replace use .clearQueue().readField('#field-to-read')
      *
      * @param string elementSelector
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    readField : function (elementSelector)
+    this.readField = function (elementSelector)
     {
-        var htstring = $(elementSelector).val(),
+        var htstring = jQuery(elementSelector).val(),
             stripped = htstring.replace(/(<([^>]+)>)/ig,"");
         return this.readToQueue(stripped);
-    },
+    }
 
     /**
-     * Reads the _content_ of given element into queue
+     * Reads the _content_ of given element {number}o queue
      * Field is indicated by selector (.elementClass or #elementID)
      *
      * New content will pe appended to the end of the queue - to replace use .clearQueue().readElement('#field-to-read')
      *
      * @param string elementSelector
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    readElement : function(elementSelector)
+    this.readElement = function(elementSelector)
     {
-        var htstring = $(elementSelector).html(),
+        var htstring = jQuery(elementSelector).html(),
             stripped = htstring.replace(/(<([^>]+)>)/ig,"");
         return this.readToQueue(stripped);
-    },
+    }
 
 
     /**
@@ -106,125 +135,166 @@ speedReader =
      * Elements innerHtlm will be updated with each type() -call
      *
      * @param string elementSelector jQuery selector
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    bind : function(elementSelector)
+    this.bind = function(elementSelector)
     {
-        this.bindedElement = $(elementSelector);
+        output = jQuery(elementSelector);
         return this;
-    },
+    }
 
     /**
      * Sets the reading-speed as words-per-minute
-     * If reading will pause and continue with new speed
+     * If reading will continue with new speed
+     * If new speed is 0 will pause
      *
-     * @param int wpm
-     * @returns {speedReader}
+     * @param {number} wpm
+     * @returns {SpeedReader}
      */
-    setSpeed : function(wpm)
+    this.setSpeed = function(wpm)
     {
-        this.eventTriggered('speed-change')
-        if (wpm > 1)
+        eventTriggered('speed-change')
+        if (wpm <= 0)
         {
-            this.wordsPerMinute = wpm;
+            speed = 0;
+        } else {
+            speed = wpm;
         }
-        if (this.reading)
+
+        if (speed === 0)
+        {
+            this.pause();
+        }
+        else if (reading)
         {
             this.pause().start();
         }
         return this;
-    },
+    }
 
     /**
-     * Start reading
-     * @returns {speedReader}
+     * Change the reading-speed by wpmChange
+     * @param {number} wpmChange
+     * @returns {SpeedReader}
      */
-    start : function()
+    this.changeSpeed = function(wpmChange)
     {
-        this.eventTriggered('start');
-        this.intervalId = setInterval(
-            function(){ speedReader.type(); },
-            this.intervalInMilliseconds(this.wordsPerMinute)
+        var newSpeed = speed + wpmChange <= 0
+            ? 0
+            : speed + wpmChange;
+
+        return this.setSpeed(newSpeed)
+    }
+
+    /**
+     * Getter for current speed
+     * @returns {number}
+     */
+    this.getSpeed = function()
+    {
+        return speed;
+    }
+
+    /**
+     * Getter for progress 0..100
+     * @returns {number}
+     */
+    this.getProgress = function()
+    {
+        return progress;
+    }
+    
+    /**
+     * Start reading
+     * @returns {SpeedReader}
+     */
+    this.start = function()
+    {
+        var selfObject = this;
+        eventTriggered('start');
+        intervalId = setInterval(
+            function(){ selfObject.type(); },
+            intervalInMilliseconds(speed)
         );
-        this.reading = true;
+        reading = true;
         return this;
-    },
+    }
 
     /**
      * Toggle reading - if reading will pause, if not reading will start reading
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    togglePlay : function()
+    this.togglePlay = function()
     {
-        return this.reading ? this.pause() : this.start();
-    },
+        return reading ? this.pause() : this.start();
+    }
 
     /**
      * Temporary stops reading - the queue position will be preserved
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    pause : function()
+    this.pause = function()
     {
-        clearInterval(this.intervalId);
-        this.reading = false;
-        this.eventTriggered('pause');
+        clearInterval(intervalId);
+        reading = false;
+        eventTriggered('pause');
         return this;
-    },
+    }
 
     /**
      * Stop reading - the queue position will be reset to 0
-     * @returns {speedReader}
+     * @returns {SpeedReader}
      */
-    stop : function()
+    this.stop = function()
     {
-        clearInterval(this.intervalId);
-        this.reading = false;
-        this.queuePosition = 0;
-        this.eventTriggered('stop');
+        clearInterval(intervalId);
+        reading = false;
+        queuePosition = 0;
+        eventTriggered('stop');
         return this;
-    },
+    }
 
     /**
-     * Types the next word from queue into element indicated via .bind()
-     * @returns {speedReader}
+     * Types the next word from queue {number}o element indicated via .bind()
+     * @returns {SpeedReader}
      */
-    type : function ()
+    this.type = function ()
     {
-        this.updateProgress();
-        if (this.queueLength == this.queuePosition + 1)
+        updateProgress();
+        if (queueLength == queuePosition + 1)
         {
             this.stop();
         }
         else
         {
-            this.bindedElement.html(this.wordQueue[this.queuePosition]);
+            output.html(wordQueue[queuePosition]);
         }
-        this.queuePosition++
-        this.eventTriggered('type');
+        queuePosition++
+        eventTriggered('type');
         return this;
-    },
+    }
 
     /**
      * Updates the progress indicator according to current position in queue
      */
-    updateProgress : function()
+    function updateProgress()
     {
-        if (this.queueLength === 0)
+        if (queueLength === 0)
         {
-            this.progress = 0;
+            progress = 0;
         }
         else
         {
-            this.progress = Math.ceil(((this.queuePosition + 1) / this.queueLength) * 100);
+            progress = Math.ceil(((queuePosition + 1) / queueLength) * 100);
         }
-    },
+    }
 
     /**
      * Adds padding and highlight to given word
      * @param string word
      * @returns string
      */
-    renderWord : function(word)
+    function renderWord(word)
     {
         var length = word.length,
             center = Math.floor(length/2),
@@ -243,35 +313,30 @@ speedReader =
             + word.substr(highlightIndex+1);
 
         return padding + word;
-    },
+    }
 
     /**
+     * @private
      * Calculate the interval length according to words-per-minute and speed-factor
-     * @param wpm
+     * @param {number} wpm
      * @returns {number}
      */
-    intervalInMilliseconds : function(wpm)
+    function intervalInMilliseconds(wpm)
     {
-        return (1 / (wpm / 60)) * 1000 * this.speedFactor;
-    },
-
-    /**
-     *  Factor used to fix reading-speed
-     *  @var float speedFactor
-     */
-    speedFactor : 1,
+        return (1 / (wpm / 60)) * 1000 * speedFactor;
+    }
 
     /**
      * Parses given text by splitting it by white-spaces
      *
      * Renders each words with renderWord()
-     * Splits > 16 character words into two words
+     * Splits > 16 character words {number}o two words
      * Adds 2 frames 'pause' after dot (.) and 1 frame 'pause' after comma (,) to improve reading experience
      *
      * @param text
      * @returns {Array}
      */
-    splitText: function(text)
+    function splitText(text)
     {
         var queue = [],
             splitted = text.split(/[ \n\t]+/),
@@ -289,11 +354,11 @@ speedReader =
                 var aboutMiddle = (word.length/2),
                     partA = word.substring(0, aboutMiddle) + '-',
                     partB = word.substring(aboutMiddle+1)
-                queue.push(this.renderWord(partA))
-                queue.push(this.renderWord(partB));
+                queue.push(renderWord(partA))
+                queue.push(renderWord(partB));
                 continue;
             }
-            queue.push(this.renderWord(word));
+            queue.push(renderWord(word));
 
             //After dot add 2 ticks pause
             if (word[word.length - 1] == ',')
@@ -308,26 +373,9 @@ speedReader =
             }
         }
 
-        this.speedFactor = (originalLength / queue.length);
+        speedFactor = (originalLength / queue.length);
         return queue;
-    },
-
-    /**
-     * Calls call-back-function(s) of given event if any
-     *
-     * Call-back functions are set with .on() method
-     * Call-back functions will be called with speedReader as first parameter
-     *
-     * @param string name
-     */
-    eventTriggered : function(eventName)
-    {
-        if (this.eventMapping[eventName])
-        {
-            for(var i = 0, max = this.eventMapping[eventName].length; i < max; i++)
-            {
-                this.eventMapping[eventName][i](this);
-            }
-        }
     }
+
+    return this;
 };
