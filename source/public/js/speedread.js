@@ -207,7 +207,7 @@ speedReader =
         }
         else
         {
-            this.bindedElement.innerHTML = this.wordQueue[this.queuePosition];
+            this.bindedElement.html(this.wordQueue[this.queuePosition]);
         }
         this.queuePosition++
         this.eventTriggered('type');

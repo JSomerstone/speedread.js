@@ -65,7 +65,7 @@
         <script>
             var initialSpeed = 340;
             $('#wpm').html(initialSpeed);
-            speedReader.bind('output').readField('#readme').setSpeed(initialSpeed);
+            speedReader.bind('#output').readField('#readme').setSpeed(initialSpeed);
 
             speedReader.on('type', function(reader){
                 $('#progress').css('width', reader.progress + '%')
