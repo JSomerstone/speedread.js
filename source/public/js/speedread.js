@@ -1,16 +1,4 @@
-String.prototype.repeat = function( num )
-{
-    return new Array( num + 1 ).join( this );
-}
 
-String.prototype.injectTo = function(index, inject)
-{
-    return this.substr(0, index) + inject + this.substr(index+1);
-}
-
-/**
- * Created by joona on 06/03/14.
- */
 speedReader =
 {
     wordQueue : [],
@@ -60,6 +48,8 @@ speedReader =
         this.eventTriggered('clear');
         this.wordQueue = [];
         this.queueLength = 0;
+        this.queuePosition = 0;
+        this.bindedElement.html('&nbsp;');
         return this;
     },
 
@@ -244,9 +234,13 @@ speedReader =
         if (length == 0)
             return '&nbsp;';
 
-        var padding = ' '.repeat(paddingLength);
+        var padding = new Array(paddingLength).join(' ');
 
-        word = word.injectTo(highlightIndex, '<span class="red">' + word.charAt(highlightIndex) + '</span>');
+        word = word.substr(0, highlightIndex)
+            + '<span class="red">'
+            + word.charAt(highlightIndex)
+            + '</span>'
+            + word.substr(highlightIndex+1);
 
         return padding + word;
     },
