@@ -1,5 +1,5 @@
 
-function SpeedReader ()
+function SpeedRead ()
 {
     var wordQueue = [],
         queueLength = 0,
@@ -167,7 +167,7 @@ function SpeedReader ()
         }
         else if (reading)
         {
-            this.pause().start();
+            this.pause().play();
         }
         return this;
     }
@@ -208,10 +208,10 @@ function SpeedReader ()
      * Start reading
      * @returns {SpeedReader}
      */
-    this.start = function()
+    this.play = function()
     {
         var selfObject = this;
-        eventTriggered('start');
+        eventTriggered('play');
         intervalId = setInterval(
             function(){ selfObject.type(); },
             intervalInMilliseconds(speed)
@@ -221,12 +221,12 @@ function SpeedReader ()
     }
 
     /**
-     * Toggle reading - if reading will pause, if not reading will start reading
+     * Toggle reading - if reading will pause, if not reading will play reading
      * @returns {SpeedReader}
      */
     this.togglePlay = function()
     {
-        return reading ? this.pause() : this.start();
+        return reading ? this.pause() : this.play();
     }
 
     /**
@@ -363,13 +363,13 @@ function SpeedReader ()
             //After dot add 2 ticks pause
             if (word[word.length - 1] == ',')
             {
-                queue.push(' ');
+                queue.push('&nbsp;');
             }
             //After comma add a pause
             else if (word[word.length - 1] == '.')
             {
-                queue.push(' ')
-                queue.push(' ');
+                queue.push('&nbsp;')
+                queue.push('&nbsp;');
             }
         }
 

@@ -65,21 +65,36 @@
         <script>
             var initialSpeed = 340;
             $('#wpm').html(initialSpeed);
-            var speedReader = new SpeedReader()
+
+            /**
+             * Initialize SpeedReader
+             *  - output target set by .bind()
+             *  - input set by .readField() or .readElement()
+             *  - initial speed set by .setSpeed()
+             */
+            var speedReader = new SpeedRead()
                 .bind('#output')
                 .readField('#readme')
                 .setSpeed(initialSpeed);
 
+            //On "stop", "clear" and "type" events update the progress-bar
             speedReader.on('stop clear type', function(reader){
                 $('#progress').css('width', reader.getProgress() + '%');
             });
-            speedReader.on('start pause', function(){
+
+            //On "play" and "pause" events toggle the icon on startBtn
+            speedReader.on('play pause', function(){
                 $('#startBtn').toggleClass('glyphicon-play glyphicon-pause');
             });
+
+            //On "speed-change" event update content of #wpm
             speedReader.on('speed-change', function(reader){
                 $('#wpm').html(reader.getSpeed());
             });
 
+            /**
+             * Set handlers of buttons
+             */
             $('#startBtn').click(function(){ speedReader.togglePlay() });
             $('#minusWpm').click(function(){ speedReader.changeSpeed(-20)} );
             $('#plusWpm').click(function(){ speedReader.changeSpeed(20)} );
@@ -87,6 +102,9 @@
                 speedReader.clearQueue().readField('#readme');
             });
 
+            /**
+             * Set key-listeners
+             */
             $('body').keyup(function(e){
                 var element = e.target.nodeName.toLowerCase();
                 if (element != 'body')

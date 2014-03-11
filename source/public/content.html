@@ -1,0 +1,101 @@
+<html>
+    <head>
+        <title>SpeedRead.js</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" type="text/css" media="all" >
+        <link rel="stylesheet" href="css/speedread.css" type="text/css" media="all" >
+    </head>
+    <body>
+        <div class="container">
+            <div class="col-md-offset-3 col-md-6">
+                <div>
+                    <h1>Reading content of a div -example</h1>
+                    <p class="lead">with <a href="https://github.com/JSomerstone/speedread.js" target="_blank">SpeedRead.js</a></p>
+                    <h2>Intro</h2>
+                    <p>
+                        To start SpeedRead, press <a href="#" class="btn btn-info btn-sm glyphicon glyphicon-forward"></a>-button
+                        on the right side. SpeedRead will read trough content below marked with class <b>"speed-readable"</b>
+                        and will automatically start to display it at 340 words/minute.
+                    </p>
+                </div>
+
+                <div class="speed-readable">
+                    <h1>Dependency injection</h1>
+                    <h2>Definition</h2>
+    
+                    <p>Dependency injection involves at least three elements:
+
+                    <ul>
+                    <li>a dependent consumer,</li>
+                    <li>a declaration of a component's dependencies, defined as interface contracts,</li>
+                    <li>an injector (sometimes referred to as a provider or container) that creates instances of classes that implement a given dependency interface on request.</li>
+                    </ul>
+
+                    <p>The dependent object describes what software component it depends on to do its work. The injector decides what concrete classes satisfy the requirements of the dependent object, and provides them to the dependent.</p>
+
+                    <p>In conventional software development, the dependent object decides for itself what concrete classes it will use. In the dependency injection pattern, this decision is delegated to the "injector" which can choose to substitute different concrete class implementations of a dependency contract interface at run-time rather than at compile time.
+                    </p>
+                    <p>Being able to make this decision at run-time rather than compile time is the key advantage of dependency injection. Multiple, different implementations of a single software component can be created at run-time and passed (injected) into the same test code. The test code can then test each different software component without being aware that what has been injected is implemented differently.
+                    </p>
+                    <h2>Motivation</h2>
+
+                    <p>The primary purpose of the dependency injection pattern is to allow selection among multiple implementations of a given dependency interface at run time, or via configuration files, instead of at compile time. The pattern is particularly useful for providing stub test implementations of complex components when testing, but is often used for locating plugin components, or locating and initializing software services.
+                    </p>
+                    <p>Unit testing of components in large software systems is difficult, because components under test often require the presence of a substantial amount of infrastructure and setup in order to operate at all. Dependency injection simplifies the process of bringing up a working instance of an isolated component for testing. Because components declare their dependencies, a test can automatically bring up only those dependencies required to perform testing.
+                    </p>
+                    <p>More importantly, injectors can be configured to swap in simplified stub implementations of sub-components when testing, the idea being that the component under test can be tested in isolation as long as the substituted sub-components implement the contract of the dependent interface sufficiently to perform the unit test in question.
+                    </p>
+                    <p>As an example, consider an automatic stock trading program that communicates with a live online trading service and stores historical analytic data in a distributed database. To test the component which recommends trades, one would ordinarily need to have a connection to the online service and an actual distributed database suitably populated with test data. Using dependency injection, the components that provide access to the online service and back-end databases could be replaced altogether with a test implementation of the dependency interface contracts that provide just enough behavior to perform tests on the component under tests.
+                    </p>
+                    <h2>Basics</h2>
+
+                    <p>Without dependency injection, a consumer component that needs a particular service in order to accomplish a task must create an instance of a class that concretely implements the dependency interface.
+                    </p>
+                    <p>When using dependency injection, a consumer component specifies the service contract by interface, and the injector component selects an implementation on behalf of the dependent component.
+                    </p>
+                    <p>In its simplest implementation, code that creates a dependent object supplies dependencies to that object via constructor arguments or by setting properties on the object.
+                    </p>
+                    <p>More complicated implementations, such as Spring, Google Guice, Glassfish HK2, and Microsoft Managed Extensibility Framework (MEF), automate this procedure. These frameworks identify constructor arguments or properties on the objects being created as requests for dependent objects, and automatically inject constructor arguments or set properties with pre-constructed instances of dependencies as part of the process of creating the dependent object. The client makes a request to the dependency injection system for an implementation of a particular interface; the dependency injection system creates the object, automatically filling in dependencies as required.
+                    </p>
+                </div>
+
+            </div><!-- /container -->
+        <nav class="navbar navbar-default navbar-fixed-bottom text-center">
+            Concept: <a href="http://www.spritzinc.com/about/">Spritz</a> |
+            Implementation: <a href="https://github.com/JSomerstone">Joona Somerkivi</a> |
+            Powered by: <a href="http://getbootstrap.com/">Bootsrap</a>, <a href="http://jquery.com/">jQuery</a>
+        </nav>
+
+        <script src="js/jquery-2.1.0.min.js" ></script>
+        <script src="js/speedread.js" ></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script>
+            var initialSpeed = 340;
+            $('.speed-readable').before('<button id="readerBtn" data-toggle="tooltip" data-placement="top" title="Press here to start speed-reading" class="btn btn-info glyphicon glyphicon-forward pull-right"></button>');
+
+            var speedReader;
+            $('#readerBtn').click(function(event){
+                if ( ! $('#reader-output').length )
+                {
+                    $('#readerBtn').after('<pre id="reader-output" class="output lead col-lg-12 hidden"></pre>');
+                }
+
+                if ( ! speedReader )
+                {
+                    speedReader = new SpeedRead()
+                        .setSpeed(340)
+                        .readElement('.speed-readable')
+                        .bind('.output')
+                        .on('play', function(){console.log('playing')})
+                        .on('pause', function(){console.log('pause')})
+                        .on('pause play', function(){
+                             $('#reader-output').toggleClass('hidden');
+                             $('#readerBtn').toggleClass('glyphicon-forward glyphicon-pause');
+                        })
+                }
+                speedReader.togglePlay();
+            });
+        </script>
+    </body>
+</html>
